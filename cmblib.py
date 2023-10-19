@@ -66,7 +66,6 @@ def cl2map(N,pix_size,ell,cl):
     FT_random_array_for_T = np.fft.fft2(random_array_for_T)  
     
     FT_2d = np.sqrt(CLTT2d) * FT_random_array_for_T 
-    plt.imshow(np.real(FT_2d))
         
 
     CMB_T = np.fft.ifft2(np.fft.fftshift(FT_2d)) 
@@ -196,3 +195,21 @@ def div(imapy,imapx,ly,lx):
 def interp(x,y,bounds_error=False,fill_value=0.,**kwargs):
     from scipy.interpolate import interp1d
     return interp1d(x,y,bounds_error=bounds_error,fill_value=fill_value,**kwargs)
+
+def corr(inputk,outputk,dell,lmax,pix_size,N,plot=False):
+    L,ppo = map2cl(outputk,dell,lmax,pix_size,N)
+    L,ppi = map2cl(inputk,dell,lmax,pix_size,N)
+    L,ppoi = map2cl(inputk,20,300,pix_size,N,outputk)
+    cc = np.nan_to_num(ppoi/np.sqrt(ppo*ppi))
+    if plot:
+        plt.plot(L,cc)
+    else:
+        return cc
+    
+
+def noise_spectra(nlev,lmax,lknee=None):
+    Clnoise = (nlev*np.pi/180./60.)**2.
+    if lknee is None:
+        return Clnoise*np.ones(lmax+1)
+    else:
+        return Clnoise*(1+(np.arange(lmax+1)/lknee)**-5.)
